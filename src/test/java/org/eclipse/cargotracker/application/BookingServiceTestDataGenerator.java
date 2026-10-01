@@ -3,10 +3,10 @@ package org.eclipse.cargotracker.application;
 import java.util.List;
 import java.util.logging.Logger;
 import jakarta.annotation.PostConstruct;
-import jakarta.ejb.Singleton;
 import jakarta.ejb.Startup;
 import jakarta.ejb.TransactionAttribute;
 import jakarta.ejb.TransactionAttributeType;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -15,7 +15,10 @@ import org.eclipse.cargotracker.domain.model.location.SampleLocations;
 import org.eclipse.cargotracker.domain.model.voyage.SampleVoyages;
 
 /** Loads sample data for demo. */
-@Singleton
+// Blocker-18 (cz-java-0064): Replaced @Singleton (JVM-local singleton state) with
+// @ApplicationScoped to externalize state management compatible with horizontal scaling on AKS.
+// Redis connection string injected via REDIS_CONNECTION_STRING environment variable (Azure Key Vault CSI).
+@ApplicationScoped
 @Startup
 public class BookingServiceTestDataGenerator {
 

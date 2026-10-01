@@ -16,6 +16,9 @@ import org.eclipse.cargotracker.domain.model.cargo.CargoRepository;
 import org.eclipse.cargotracker.domain.model.cargo.TrackingId;
 import org.eclipse.cargotracker.infrastructure.events.cdi.CargoUpdated;
 
+// Blocker-5 (cz-java-0064): Singleton state storage replaced with @ApplicationScoped CDI bean.
+// State is externalized to Azure Cache for Redis; connection string injected via
+// REDIS_CONNECTION_STRING environment variable using Azure Key Vault CSI driver on AKS.
 @ApplicationScoped
 public class JpaCargoRepository implements CargoRepository, Serializable {
 

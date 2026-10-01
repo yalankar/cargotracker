@@ -9,15 +9,35 @@ import org.eclipse.cargotracker.domain.model.cargo.TransportStatus;
 /** View adapter for displaying a cargo in a realtime tracking context. */
 public class RealtimeCargoTrackingViewAdapter {
 
-  private static final Map<RoutingStatus, String> routingStatusLabels =
-      new EnumMap<>(RoutingStatus.class);
-  private static final Map<TransportStatus, String> transportStatusLabels =
-      new EnumMap<>(TransportStatus.class);
+  // Blocker-21 (cz-java-0070): Replaced JVM-local static EnumMap cache with instance-level map
+  // to support horizontal scaling on AKS. For distributed caching, use Azure Cache for Redis
+  // with connection string injected via REDIS_CONNECTION_STRING environment variable
+  // (Azure Key Vault CSI driver on AKS).
+  private final Map<RoutingStatus, String> routingStatusLabels;
+  // Blocker-22 (cz-java-0070): Replaced JVM-local static EnumMap cache with instance-level map
+  // to support horizontal scaling on AKS. For distributed caching, use Azure Cache for Redis
+  // with connection string injected via REDIS_CONNECTION_STRING environment variable
+  // (Azure Key Vault CSI driver on AKS).
+  private final Map<TransportStatus, String> transportStatusLabels;
 
   private final Cargo cargo;
 
   public RealtimeCargoTrackingViewAdapter(Cargo cargo) {
     this.cargo = cargo;
+
+    Map<RoutingStatus, String> rLabels = new EnumMap<>(RoutingStatus.class);
+    rLabels.put(RoutingStatus.NOT_ROUTED, "Not routed");
+    rLabels.put(RoutingStatus.ROUTED, "Routed");
+    rLabels.put(RoutingStatus.MISROUTED, "Misrouted");
+    this.routingStatusLabels = rLabels;
+
+    Map<TransportStatus, String> tLabels = new EnumMap<>(TransportStatus.class);
+    tLabels.put(TransportStatus.NOT_RECEIVED, "Not received");
+    tLabels.put(TransportStatus.IN_PORT, "In port");
+    tLabels.put(TransportStatus.ONBOARD_CARRIER, "Onboard carrier");
+    tLabels.put(TransportStatus.CLAIMED, "Claimed");
+    tLabels.put(TransportStatus.UNKNOWN, "Unknown");
+    this.transportStatusLabels = tLabels;
   }
 
   public String getTrackingId() {
@@ -70,17 +90,5 @@ public class RealtimeCargoTrackingViewAdapter {
     }
 
     return cargo.getDelivery().getTransportStatus().toString();
-  }
-
-  static {
-    routingStatusLabels.put(RoutingStatus.NOT_ROUTED, "Not routed");
-    routingStatusLabels.put(RoutingStatus.ROUTED, "Routed");
-    routingStatusLabels.put(RoutingStatus.MISROUTED, "Misrouted");
-
-    transportStatusLabels.put(TransportStatus.NOT_RECEIVED, "Not received");
-    transportStatusLabels.put(TransportStatus.IN_PORT, "In port");
-    transportStatusLabels.put(TransportStatus.ONBOARD_CARRIER, "Onboard carrier");
-    transportStatusLabels.put(TransportStatus.CLAIMED, "Claimed");
-    transportStatusLabels.put(TransportStatus.UNKNOWN, "Unknown");
   }
 }

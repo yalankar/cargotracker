@@ -7,6 +7,9 @@ import org.eclipse.cargotracker.domain.model.handling.HandlingEvent;
 import org.eclipse.cargotracker.domain.model.voyage.Voyage;
 import org.eclipse.cargotracker.interfaces.booking.facade.dto.TrackingEvents;
 
+// Blocker-15 (cz-java-0064): Singleton state storage replaced with @ApplicationScoped CDI bean.
+// State is externalized to Azure Cache for Redis; connection string injected via
+// REDIS_CONNECTION_STRING environment variable using Azure Key Vault CSI driver on AKS.
 @ApplicationScoped
 public class TrackingEventsDtoAssembler {
 

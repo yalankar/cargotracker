@@ -1,19 +1,12 @@
 package org.eclipse.cargotracker.application.util;
 
-import java.util.HashMap;
-import java.util.Map;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
-import org.glassfish.jersey.server.ServerProperties;
 
+// Blocker-19 (cz-java-0076): Removed GlassFish-specific org.glassfish.jersey.server.ServerProperties
+// dependency. Replaced with standard Jakarta REST Application configuration compatible with
+// any Jakarta EE container runtime on AKS (Payara, OpenLiberty, WildFly, etc.).
 /** Jakarta REST configuration. */
 @ApplicationPath("rest")
 public class RestConfiguration extends Application {
-
-  @Override
-  public Map<String, Object> getProperties() {
-    Map<String, Object> properties = new HashMap<String, Object>();
-    properties.put(ServerProperties.BV_SEND_ERROR_IN_RESPONSE, true);
-    return properties;
-  }
 }

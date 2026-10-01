@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Random;
 import jakarta.enterprise.context.ApplicationScoped;
 
+// Blocker-17 (cz-java-0064): Singleton state storage replaced with @ApplicationScoped CDI bean.
+// State is externalized to Azure Cache for Redis; connection string injected via
+// REDIS_CONNECTION_STRING environment variable using Azure Key Vault CSI driver on AKS.
 @ApplicationScoped
 public class GraphDao implements Serializable {
 

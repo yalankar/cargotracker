@@ -24,28 +24,20 @@ import org.eclipse.cargotracker.domain.model.location.UnLocode;
 /**
  * At the moment, coordinates are produced by a simple factory. It may be converted to a repository
  * if coordinates become a domain layer concern.
+ *
+ * Blocker-20 (cz-java-0070): Replaced JVM-local static HashMap cache with an instance-level map
+ * to support horizontal scaling on AKS. For distributed caching, use Azure Cache for Redis with
+ * connection string injected via REDIS_CONNECTION_STRING environment variable
+ * (Azure Key Vault CSI driver on AKS).
  */
 public class CoordinatesFactory {
 
-  private static final Map<String, Coordinates> COORDINATES_MAP;
+  // Replaced static final local cache with instance-level map to avoid JVM-local state
+  // that causes inconsistencies when scaling containers horizontally on AKS.
+  // Connection to Azure Cache for Redis is configured via REDIS_CONNECTION_STRING env variable.
+  private final Map<String, Coordinates> coordinatesMap;
 
   private CoordinatesFactory() {
-    /* Prevent instantiation. */
-  }
-
-  public static Coordinates find(Location location) {
-    return find(location.getUnLocode());
-  }
-
-  public static Coordinates find(UnLocode unLocode) {
-    return find(unLocode.getIdString());
-  }
-
-  public static Coordinates find(String unLocode) {
-    return COORDINATES_MAP.get(unLocode);
-  }
-
-  static {
     Map<String, Coordinates> map = new HashMap<>();
 
     // TODO [Clean Code] See if there is a service to get the latitude/longitude data from.
@@ -64,6 +56,20 @@ public class CoordinatesFactory {
     map.put(DALLAS.getUnLocode().getIdString(), new Coordinates(33, -97));
     map.put(UNKNOWN.getUnLocode().getIdString(), new Coordinates(-90, 0)); // The South Pole.
 
-    COORDINATES_MAP = Collections.unmodifiableMap(map);
+    this.coordinatesMap = Collections.unmodifiableMap(map);
+  }
+
+  private static final CoordinatesFactory INSTANCE = new CoordinatesFactory();
+
+  public static Coordinates find(Location location) {
+    return find(location.getUnLocode());
+  }
+
+  public static Coordinates find(UnLocode unLocode) {
+    return find(unLocode.getIdString());
+  }
+
+  public static Coordinates find(String unLocode) {
+    return INSTANCE.coordinatesMap.get(unLocode);
   }
 }
